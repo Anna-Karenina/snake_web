@@ -12,6 +12,7 @@ pub enum Direction {
     Down,
     Left,
 }
+#[derive(Clone, Copy)]
 pub struct SnakeCell(usize);
 
 #[wasm_bindgen]
@@ -36,10 +37,12 @@ impl Snake {
 #[wasm_bindgen]
 impl World {
     pub fn new(width: usize, start_idx: usize) -> World {
+        let start_snake_length = 3;
         World {
             width,
             size: width * width,
-            snake: Snake::new(start_idx, 2),
+            snake: Snake::new(start_idx, start_snake_length),
+            next_cell: None,
         }
     }
 
@@ -51,7 +54,13 @@ impl World {
         self.snake.body[0].0
     }
 
-    pub fn change_snake_dir(&mut self, direction: Direction) {
+    pub fn change_snake_direction(&mut self, direction: Direction) {
+        let next_cell = self.generate_next_snake_cell(&direction);
+
+        if self.snake.body[1].0 == next_cell.0 {
+            return;
+        }
+        self.next_cell = Some(next_cell);
         self.snake.direction = direction;
     }
 
@@ -70,19 +79,74 @@ impl World {
     }
 
     pub fn step(&mut self) {
-        let next_cell = self.generate_next_snake_cell();
-        self.snake.body[0] = next_cell;
+        let temp = self.snake.body.clone();
+
+        match self.next_cell {
+            Some(cell) => {
+                self.snake.body[0] = cell;
+                self.next_cell = None;
+            }
+            None => {
+                self.snake.body[0] = self.generate_next_snake_cell(&self.snake.direction);
+            }
+        }
+
+        let len = self.snake_length();
+
+        for i in 1..len {
+            self.snake.body[i] = SnakeCell(temp[i - 1].0);
+        }
     }
 
-    fn generate_next_snake_cell(&self) -> SnakeCell {
+    // operation % and / to much expensive so refactor
+    // fn generate_next_snake_cell(&self) -> SnakeCell {
+    //     let snake_idx = self.snake_head();
+    //     let row = snake_idx / self.width;
+
+    //     return match self.snake.direction {
+    //         Direction::Right => SnakeCell((row * self.width) + (snake_idx + 1) % self.width),
+    //         Direction::Left => SnakeCell((row * self.width) + (snake_idx - 1) % self.width),
+    //         Direction::Up => SnakeCell((snake_idx - self.width) % self.size),
+    //         Direction::Down => SnakeCell((snake_idx + self.width) % self.size),
+    //     };
+    // }
+    fn generate_next_snake_cell(&self, direction: &Direction) -> SnakeCell {
         let snake_idx = self.snake_head();
         let row = snake_idx / self.width;
 
-        return match self.snake.direction {
-            Direction::Right => SnakeCell((row * self.width) + (snake_idx + 1) % self.width),
-            Direction::Left => SnakeCell((row * self.width) + (snake_idx - 1) % self.width),
-            Direction::Up => SnakeCell((snake_idx - self.width) % self.size),
-            Direction::Down => SnakeCell((snake_idx + self.width) % self.size),
+        return match direction {
+            Direction::Right => {
+                let threshold = (row + 1) * self.width;
+                if snake_idx + 1 == threshold {
+                    SnakeCell(threshold - self.width)
+                } else {
+                    SnakeCell(snake_idx + 1)
+                }
+            }
+            Direction::Left => {
+                let threshold = row * self.width;
+                if snake_idx == threshold {
+                    SnakeCell(threshold + (self.width - 1))
+                } else {
+                    SnakeCell(snake_idx - 1)
+                }
+            }
+            Direction::Up => {
+                let threshold = snake_idx - (row * self.width);
+                if snake_idx == threshold {
+                    SnakeCell((self.size - self.width) + threshold)
+                } else {
+                    SnakeCell(snake_idx - self.width)
+                }
+            }
+            Direction::Down => {
+                let threshold = snake_idx + ((self.width - row) * self.width);
+                if snake_idx + self.width == threshold {
+                    SnakeCell(threshold - ((row + 1) * self.width))
+                } else {
+                    SnakeCell(snake_idx + self.width)
+                }
+            }
         };
     }
 }
@@ -91,4 +155,5 @@ pub struct World {
     width: usize,
     snake: Snake,
     size: usize,
+    next_cell: Option<SnakeCell>,
 }
