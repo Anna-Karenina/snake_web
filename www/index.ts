@@ -1,9 +1,10 @@
 import init, { World, Direction } from "snake_engine";
+import { random } from "./utils/random";
 
 init().then((wasm) => {
   const CELL_SIZE = 20;
   const WORLD_WIDTH = 8;
-  const snakeSpawnIdx = Date.now() % (WORLD_WIDTH * WORLD_WIDTH);
+  const snakeSpawnIdx = random(WORLD_WIDTH * WORLD_WIDTH);
 
   const world = World.new(WORLD_WIDTH, snakeSpawnIdx);
   const worldWidth = world.width();
@@ -15,21 +16,21 @@ init().then((wasm) => {
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
       case "ArrowUp":
-        world.change_snake_dir(Direction.Up);
+        world.change_snake_direction(Direction.Up);
         break;
 
       case "ArrowRight":
-        world.change_snake_dir(Direction.Right);
+        world.change_snake_direction(Direction.Right);
 
         break;
 
       case "ArrowDown":
-        world.change_snake_dir(Direction.Down);
+        world.change_snake_direction(Direction.Down);
 
         break;
 
       case "ArrowLeft":
-        world.change_snake_dir(Direction.Left);
+        world.change_snake_direction(Direction.Left);
 
         break;
     }
@@ -47,6 +48,18 @@ init().then((wasm) => {
       ctx.moveTo(0, CELL_SIZE * y);
       ctx.lineTo(worldWidth * CELL_SIZE, CELL_SIZE * y);
     }
+
+    ctx.stroke();
+  };
+
+  const drawReward = () => {
+    const idx = world.reward_cell();
+    const col = idx % worldWidth;
+    const row = Math.floor(idx / worldWidth);
+
+    ctx.beginPath();
+    ctx.fillStyle = "#FF0000";
+    ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
     ctx.stroke();
   };
@@ -76,6 +89,7 @@ init().then((wasm) => {
   const paint = () => {
     drawWorld();
     drawSnake();
+    drawReward();
   };
 
   const update = () => {
