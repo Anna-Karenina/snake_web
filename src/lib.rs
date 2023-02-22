@@ -42,7 +42,7 @@ impl Snake {
         }
         Snake {
             body,
-            direction: Direction::Down,
+            direction: Direction::Right,
         }
     }
 }
@@ -54,14 +54,14 @@ pub struct World {
     next_cell: Option<SnakeCell>,
     reward_cell: Option<usize>,
     status: Option<GameStatus>,
+    points: usize,
 }
 
 #[wasm_bindgen]
 impl World {
     pub fn new(width: usize, start_idx: usize) -> World {
+        let snake = Snake::new(start_idx, 3);
         let size = width * width;
-        let start_snake_length = 3;
-        let snake = Snake::new(start_idx, start_snake_length);
 
         World {
             width,
@@ -70,6 +70,7 @@ impl World {
             snake,
             next_cell: None,
             status: None,
+            points: 0,
         }
     }
 
@@ -87,6 +88,10 @@ impl World {
 
     pub fn width(&self) -> usize {
         self.width
+    }
+
+    pub fn points(&self) -> usize {
+        self.points
     }
 
     pub fn snake_head(&self) -> usize {
@@ -129,7 +134,6 @@ impl World {
     // }
     // *const is raw pointer
     // borrowing rules does not apply to it
-
     pub fn snake_cell(&self) -> *const SnakeCell {
         self.snake.body.as_ptr()
     }
@@ -153,9 +157,7 @@ impl World {
                     }
                 }
 
-                let len = self.snake_length();
-
-                for i in 1..len {
+                for i in 1..self.snake_length() {
                     self.snake.body[i] = SnakeCell(temp[i - 1].0);
                 }
 
@@ -165,6 +167,7 @@ impl World {
 
                 if self.reward_cell == Some(self.snake_head()) {
                     if self.snake_length() < self.size {
+                        self.points += 1;
                         self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body)
                     } else {
                         self.reward_cell = None;
@@ -174,7 +177,6 @@ impl World {
                     self.snake.body.push(SnakeCell(self.snake.body[1].0));
                 }
             }
-            None => {}
             _ => {}
         }
     }

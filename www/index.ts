@@ -1,4 +1,4 @@
-import init, { World, Direction } from "snake_engine";
+import init, { World, Direction, GameStatus } from "snake_engine";
 import { random } from "./utils/random";
 
 init().then((wasm) => {
@@ -8,17 +8,22 @@ init().then((wasm) => {
 
   const gameControlBtn = document.getElementById("game-control-btn");
   const gameStatus = document.getElementById("game-status");
-  const world = World.new(WORLD_WIDTH, snakeSpawnIdx);
-  const worldWidth = world.width();
+  const gamePoints = document.getElementById("game-points");
+
   const canvas = document.getElementById("snake-canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
+
+  const world = World.new(WORLD_WIDTH, snakeSpawnIdx);
+  const worldWidth = world.width();
+
   canvas.height = worldWidth * CELL_SIZE;
   canvas.width = worldWidth * CELL_SIZE;
 
   gameControlBtn.addEventListener("click", (_) => {
     const status = world.game_status();
-    gameControlBtn.textContent = "Payling...";
-    if (!status) {
+
+    if (status === undefined) {
+      gameControlBtn.textContent = "Payling...";
       world.start_game();
       play();
     } else {
@@ -75,15 +80,12 @@ init().then((wasm) => {
     ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
     ctx.stroke();
-
-    if (idx === 1000) {
-      // alert("You win!");
-    }
   };
 
   const drawSnake = () => {
     const snakeCellPtr = world.snake_cell();
     const snakeLen = world.snake_length();
+
     const snakeCells = new Uint32Array(
       wasm.memory.buffer,
       snakeCellPtr,
@@ -109,14 +111,26 @@ init().then((wasm) => {
     gameStatus.textContent = world.game_status_text();
   };
 
+  const drawGamePoints = () => {
+    gamePoints.textContent = world.points().toString();
+  };
+
   const paint = () => {
     drawWorld();
     drawSnake();
     drawReward();
     drawGameStatus();
+    drawGamePoints();
   };
 
   const play = () => {
+    const status = world.game_status();
+
+    if ([GameStatus.Lost, GameStatus.Won].includes(status)) {
+      gameControlBtn.textContent = "Re-play";
+      return;
+    }
+
     const fps = 3;
     setTimeout(() => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
