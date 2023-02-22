@@ -77,7 +77,7 @@ init().then((wasm) => {
     ctx.stroke();
 
     if (idx === 1000) {
-      alert("You win!");
+      // alert("You win!");
     }
   };
 
