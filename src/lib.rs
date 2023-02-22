@@ -51,25 +51,28 @@ pub struct World {
 impl World {
     pub fn new(width: usize, start_idx: usize) -> World {
         let size = width * width;
-        let mut reward_cell;
         let start_snake_length = 3;
         let snake = Snake::new(start_idx, start_snake_length);
-
-        // generate reward outside of snake body
-        loop {
-            reward_cell = random(size);
-            if !snake.body.contains(&SnakeCell(reward_cell)) {
-                break;
-            }
-        }
 
         World {
             width,
             size,
+            reward_cell: World::gen_reward_cell(size, &snake.body),
             snake,
             next_cell: None,
-            reward_cell,
         }
+    }
+
+    fn gen_reward_cell(max: usize, snake_body: &Vec<SnakeCell>) -> usize {
+        let mut reward_cell;
+        // generate reward outside of snake body
+        loop {
+            reward_cell = random(max);
+            if !snake_body.contains(&SnakeCell(reward_cell)) {
+                break;
+            }
+        }
+        reward_cell
     }
 
     pub fn width(&self) -> usize {
@@ -125,6 +128,10 @@ impl World {
 
         for i in 1..len {
             self.snake.body[i] = SnakeCell(temp[i - 1].0);
+        }
+
+        if self.reward_cell == self.snake_head() {
+            self.snake.body.push(SnakeCell(self.snake.body[1].0));
         }
     }
 
