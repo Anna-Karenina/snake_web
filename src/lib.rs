@@ -17,7 +17,8 @@ pub enum Direction {
     Down,
     Left,
 }
-
+#[wasm_bindgen]
+#[derive(Clone, Copy)]
 pub enum GameStatus {
     Won,
     Lost,
@@ -108,6 +109,19 @@ impl World {
 
     pub fn snake_length(&self) -> usize {
         self.snake.body.len()
+    }
+
+    pub fn game_status(&self) -> Option<GameStatus> {
+        self.status
+    }
+
+    pub fn game_status_text(&self) -> String {
+        match self.status {
+            Some(GameStatus::Won) => String::from("You have won!"),
+            Some(GameStatus::Lost) => String::from("You have lost!"),
+            Some(GameStatus::Played) => String::from("Playing"),
+            None => String::from("No status"),
+        }
     }
     // cannot return a ref to JS cuz of borroving rules
     // pub fn snake_cell(&self) -> &Vec<SnakeCell> {
