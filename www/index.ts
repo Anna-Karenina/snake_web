@@ -92,13 +92,15 @@ init().then((wasm) => {
     const headColor = "#7878db";
     const bodyColor = "#333333";
 
-    snakeCells.forEach((cellIdx, idx) => {
-      const col = cellIdx % worldWidth;
-      const row = Math.floor(cellIdx / worldWidth);
-      ctx.fillStyle = idx === 0 ? headColor : bodyColor;
-      ctx.beginPath();
-      ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-    });
+    snakeCells
+      .filter((cellidx, idx) => !(idx > 0 && cellidx === snakeCells[0]))
+      .forEach((cellIdx, idx) => {
+        const col = cellIdx % worldWidth;
+        const row = Math.floor(cellIdx / worldWidth);
+        ctx.fillStyle = idx === 0 ? headColor : bodyColor;
+        ctx.beginPath();
+        ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      });
 
     ctx.stroke();
   };
