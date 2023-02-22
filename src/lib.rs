@@ -17,6 +17,13 @@ pub enum Direction {
     Down,
     Left,
 }
+
+pub enum GameStatus {
+    Won,
+    Lost,
+    Played,
+}
+
 #[derive(PartialEq, Clone, Copy)]
 pub struct SnakeCell(usize);
 
@@ -45,6 +52,7 @@ pub struct World {
     size: usize,
     next_cell: Option<SnakeCell>,
     reward_cell: usize,
+    status: Option<GameStatus>,
 }
 
 #[wasm_bindgen]
@@ -60,6 +68,7 @@ impl World {
             reward_cell: World::gen_reward_cell(size, &snake.body),
             snake,
             next_cell: None,
+            status: None,
         }
     }
 
@@ -111,27 +120,43 @@ impl World {
         self.snake.body.as_ptr()
     }
 
+    pub fn start_game(&mut self) {
+        self.status = Some(GameStatus::Played);
+    }
+
     pub fn step(&mut self) {
-        let temp = self.snake.body.clone();
+        match self.status {
+            Some(GameStatus::Played) => {
+                let temp = self.snake.body.clone();
 
-        match self.next_cell {
-            Some(cell) => {
-                self.snake.body[0] = cell;
-                self.next_cell = None;
+                match self.next_cell {
+                    Some(cell) => {
+                        self.snake.body[0] = cell;
+                        self.next_cell = None;
+                    }
+                    None => {
+                        self.snake.body[0] = self.generate_next_snake_cell(&self.snake.direction);
+                    }
+                }
+
+                let len = self.snake_length();
+
+                for i in 1..len {
+                    self.snake.body[i] = SnakeCell(temp[i - 1].0);
+                }
+
+                if self.reward_cell == self.snake_head() {
+                    if self.snake_length() < self.size {
+                        self.reward_cell = World::gen_reward_cell(self.size, &self.snake.body)
+                    } else {
+                        self.reward_cell = 1000;
+                    }
+
+                    self.snake.body.push(SnakeCell(self.snake.body[1].0));
+                }
             }
-            None => {
-                self.snake.body[0] = self.generate_next_snake_cell(&self.snake.direction);
-            }
-        }
-
-        let len = self.snake_length();
-
-        for i in 1..len {
-            self.snake.body[i] = SnakeCell(temp[i - 1].0);
-        }
-
-        if self.reward_cell == self.snake_head() {
-            self.snake.body.push(SnakeCell(self.snake.body[1].0));
+            None => {}
+            _ => {}
         }
     }
 

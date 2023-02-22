@@ -6,12 +6,17 @@ init().then((wasm) => {
   const WORLD_WIDTH = 8;
   const snakeSpawnIdx = random(WORLD_WIDTH * WORLD_WIDTH);
 
+  const gameControlBtn = document.getElementById("game-control-btn");
   const world = World.new(WORLD_WIDTH, snakeSpawnIdx);
   const worldWidth = world.width();
   const canvas = document.getElementById("snake-canvas") as HTMLCanvasElement;
   const ctx = canvas.getContext("2d");
   canvas.height = worldWidth * CELL_SIZE;
   canvas.width = worldWidth * CELL_SIZE;
+
+  gameControlBtn.addEventListener("click", (_) => {
+    world.start_game();
+  });
 
   document.addEventListener("keydown", (event) => {
     switch (event.code) {
@@ -62,6 +67,10 @@ init().then((wasm) => {
     ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
     ctx.stroke();
+
+    if (idx === 1000) {
+      alert("You win!");
+    }
   };
 
   const drawSnake = () => {
