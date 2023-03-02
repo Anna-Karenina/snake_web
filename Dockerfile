@@ -14,14 +14,14 @@ CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
 
 WORKDIR /app
 ADD src ./src
-ADD www ./www
+ADD web_app ./web_app
 COPY Cargo.toml Cargo.lock ./
 
 RUN mkdir -p /pkg
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 RUN wasm-pack build --target web 
 
-WORKDIR /app/www/
+WORKDIR /app/web_app/
 RUN npm install
 EXPOSE 80
 RUN npm run build 
