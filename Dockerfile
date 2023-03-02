@@ -6,6 +6,12 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN apt-get -y update && apt-get -y install nginx
+
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+
 WORKDIR /app
 ADD src ./src
 ADD www ./www
@@ -17,7 +23,8 @@ RUN wasm-pack build --target web
 
 WORKDIR /app/www/
 RUN npm install
-EXPOSE 8080
-RUN npm run dev
+EXPOSE 80
+RUN npm run build 
+
 
 
