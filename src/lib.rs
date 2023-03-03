@@ -162,6 +162,7 @@ impl World {
                 }
 
                 if self.snake.body[1..self.snake_length()].contains(&self.snake.body[0]) {
+                    // TODO: add some struct notifier for send message to db
                     self.status = Some(GameStatus::Lost);
                 }
 
