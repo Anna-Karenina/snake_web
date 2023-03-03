@@ -86,6 +86,12 @@ impl World {
         Some(reward_cell)
     }
 
+    pub fn restart_game(&mut self, start_idx: usize) {
+        self.snake = Snake::new(start_idx, 3);
+        self.points = 0;
+        self.status = Some(GameStatus::Played);
+    }
+
     pub fn width(&self) -> usize {
         self.width
     }

@@ -27,7 +27,8 @@ init().then((wasm) => {
       world.start_game();
       play();
     } else {
-      console.log("must stops");
+      world.restart_game(snakeSpawnIdx);
+      play();
     }
   });
 
@@ -125,7 +126,6 @@ init().then((wasm) => {
 
   const play = () => {
     const status = world.game_status();
-
     if ([GameStatus.Lost, GameStatus.Won].includes(status)) {
       gameControlBtn.textContent = "Re-play";
       return;
