@@ -5,10 +5,13 @@ import * as classes from "./App.module.css";
 export function App() {
   return (
     <main className={classes.main}>
-      <h1>Hello world!</h1>
-      <Link to="dashboard">dashboard</Link>
-      <Link to="game">Game</Link>
-      <Outlet />
+      <nav>
+        <Link to="dashboard">dashboard</Link>
+        <Link to="game">Game</Link>
+      </nav>
+      <section>
+        <Outlet />
+      </section>
     </main>
   );
 }

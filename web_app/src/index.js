@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { App, Dashboard } from "./App";
 import React from "react";
-import { Game } from "./presentation/game/Game";
+import { Canvas } from "./presentation/game/Canvas";
 import "the-new-css-reset/css/reset.css";
 import {
   createBrowserRouter,
@@ -14,7 +14,7 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route path="dashboard" element={<Dashboard />} />
-      <Route path="game" element={<Game />} />
+      <Route path="game" element={<Canvas />} />
       {/* ... etc. */}
     </Route>
   )

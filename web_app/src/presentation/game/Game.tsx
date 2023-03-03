@@ -23,15 +23,13 @@ export function Game() {
     canvas.height = worldWidth * CELL_SIZE;
     canvas.width = worldWidth * CELL_SIZE;
 
-    gameControlBtn.addEventListener("click", (_) => {
+    gameControlBtn!.addEventListener("click", (_) => {
       const status = world.game_status();
 
       if (status === undefined) {
-        gameControlBtn.textContent = "Payling...";
+        gameControlBtn!.textContent = "Payling...";
         world.start_game();
         play();
-      } else {
-        console.log("must stops");
       }
     });
 
@@ -112,11 +110,11 @@ export function Game() {
     };
 
     const drawGameStatus = () => {
-      gameStatus.textContent = world.game_status_text();
+      gameStatus!.textContent = world.game_status_text();
     };
 
     const drawGamePoints = () => {
-      gamePoints.textContent = world.points().toString();
+      gamePoints!.textContent = world.points().toString();
     };
 
     const paint = () => {
@@ -129,9 +127,10 @@ export function Game() {
 
     const play = () => {
       const status = world.game_status();
+      console.log(status);
 
-      if ([GameStatus.Lost, GameStatus.Won].includes(status)) {
-        gameControlBtn.textContent = "Re-play";
+      if ([GameStatus.Lost, GameStatus.Won].includes(status!)) {
+        gameControlBtn!.textContent = "Re-play";
         return;
       }
 
@@ -163,7 +162,7 @@ export function Game() {
           <button id="game-control-btn">Play</button>
         </div>
       </div>
-      <canvas id="snake-canvas"></canvas>
+      <canvas id="snake-canvas" />
     </div>
   );
 }
